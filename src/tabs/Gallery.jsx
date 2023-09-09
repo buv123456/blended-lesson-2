@@ -28,12 +28,8 @@ export class Gallery extends Component {
     }
     this.setState({ isLoading: true });
     try {
-      const {
-        photos,
-        total_results,
-        per_page,
-        page: currentPage,
-      } = await ImageService.getImages(query, page);
+      const res = await ImageService.getImages(query, page);
+      const { photos, total_results, per_page, page: currentPage } = res.data;
       if (photos.length === 0) {
         this.setState({ isEmpty: true });
       }
@@ -50,7 +46,17 @@ export class Gallery extends Component {
   };
 
   onHandleSubmit = value => {
-    this.setState({ query: value });
+    this.setState({
+      query: value,
+      page: 1,
+      images: [],
+      isEmpty: false,
+      error: null,
+    });
+  };
+
+  onLoadMore = () => {
+    this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
   render() {
@@ -74,6 +80,11 @@ export class Gallery extends Component {
               </GridItem>
             ))}
           </Grid>
+        )}
+        {isVisible && (
+          <Button type="button" onClick={this.onLoadMore} disabled={isLoading}>
+            {isLoading ? 'Loading...' : 'Load more'}
+          </Button>
         )}
       </>
     );
